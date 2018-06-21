@@ -37,11 +37,16 @@ public class ItemDetailServiceImpl implements ItemDetailService {
     @Autowired
     private RestDmItemCommentClient restDmItemCommentClient;
 
+    @Autowired
+    private RestDmUserClient dmUserClient;
+
     @Override
     public Dto<ItemDetailVo> queryItemDetail(Long id) throws Exception {
         //查询对应ID的商品
         DmItem dmItem = restDmItemClient.getDmItemById(id);
-        checkDataIsNull(dmItem);
+        if(EmptyUtils.isEmpty(dmItem)){
+            return null;
+        }
         //查询图片信息
         List<DmImage> dmImageList = getImageList(dmItem.getId(), 1, 1, false);
         //获取剧场信息
@@ -56,19 +61,21 @@ public class ItemDetailServiceImpl implements ItemDetailService {
         List<ItemSchedulerVo> resultList = new ArrayList<ItemSchedulerVo>();
         //查询对应ID的商品
         DmItem dmItem = restDmItemClient.getDmItemById(id);
-        checkDataIsNull(dmItem);
+        if(EmptyUtils.isEmpty(dmItem)){
+            return null;
+        }
         //查询对应的排期列表
         Map<String, Object> param = new HashMap<String, Object>();
         param.put("itemId", dmItem.getId());
         List<DmScheduler> dmSchedulerList = restDmSchedulerClient.getDmSchedulerListByMap(param);
         if (EmptyUtils.isEmpty(dmSchedulerList) || EmptyUtils.isEmpty(dmSchedulerList)) {
-            throw new BaseException(ItemErrorCode.ITEM_NO_DATA);
+            return null;
         }
         //组装返回数据
         for (int i = 0; i < dmSchedulerList.size(); i++) {
             ItemSchedulerVo itemSchedulerVo = new ItemSchedulerVo();
-            BeanUtils.copyProperties(dmSchedulerList.get(i), itemSchedulerVo);
             BeanUtils.copyProperties(dmItem, itemSchedulerVo);
+            BeanUtils.copyProperties(dmSchedulerList.get(i), itemSchedulerVo);
             itemSchedulerVo.setStartTime(DateUtil.format(dmItem.getStartTime()));
             itemSchedulerVo.setEndTime(DateUtil.format(dmItem.getEndTime()));
             resultList.add(itemSchedulerVo);
@@ -84,7 +91,7 @@ public class ItemDetailServiceImpl implements ItemDetailService {
         List<DmSchedulerSeatPrice> dmSchedulerSeatPrices = restDmSchedulerSeatPriceClient.getDmSchedulerSeatPriceListByMap(paramMap);
         List<ItemPriceVo> itemPriceVoList = new ArrayList<ItemPriceVo>();
         if (EmptyUtils.isEmpty(dmSchedulerSeatPrices)) {
-            throw new BaseException(ItemErrorCode.ITEM_NO_DATA);
+            return null;
         }
         for (DmSchedulerSeatPrice seatPrice : dmSchedulerSeatPrices) {
             ItemPriceVo itemPriceVo = new ItemPriceVo();
@@ -114,9 +121,12 @@ public class ItemDetailServiceImpl implements ItemDetailService {
         //根据剧评中的用户ID获取用户头像并封装返回数据
         for (DmItemComment dmItemComment : dmCommentList) {
             ItemCommentVo itemCommentVo = new ItemCommentVo();
-
             BeanUtils.copyProperties(dmItemComment, itemCommentVo);
-
+            //查询用户信息
+            DmUser dmUser = dmUserClient.getDmUserById(dmItemComment.getUserId());
+            if (EmptyUtils.isNotEmpty(dmUser)) {
+                itemCommentVo.setUserName(dmUser.getNickName());
+            }
             //获取用户头像
             List<DmImage> dmImageList = getImageList(dmItemComment.getUserId(), 0, 0, true);
             if (EmptyUtils.isNotEmpty(dmImageList)) {
@@ -186,14 +196,5 @@ public class ItemDetailServiceImpl implements ItemDetailService {
         itemDetailVo.setId(dmItem.getId());
         itemDetailVo.setCommentCount(dmItem.getCommentCount());
         return itemDetailVo;
-    }
-
-    /**
-     * 检测数据是否为空
-     */
-    public void checkDataIsNull(Object object) throws BaseException {
-        if (EmptyUtils.isEmpty(object)) {
-            throw new BaseException(ItemErrorCode.ITEM_NO_DATA);
-        }
     }
 }

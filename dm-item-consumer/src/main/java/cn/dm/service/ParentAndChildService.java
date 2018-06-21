@@ -50,9 +50,10 @@ public interface ParentAndChildService {
      *
      * @param month 月份(1,2,3,4.....)
      * @param year  年份(2018)
+     * @param itemTypeId
      * @return
      * @throws Exception
      */
-    public Dto<List<MonthVo>> queryItemByMonth(Integer month, Integer year) throws Exception;
+    public Dto<List<MonthVo>> queryItemByMonth(Integer month, Integer year,Long itemTypeId) throws Exception;
 
 }

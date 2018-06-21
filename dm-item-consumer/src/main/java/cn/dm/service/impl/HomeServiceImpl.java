@@ -78,7 +78,7 @@ public class HomeServiceImpl implements HomeService{
         List<DmItem> dmItemList=restDmItemClient.getDmItemListByMap(param);
         List<HotItemVo> hotItemVoList=new ArrayList<HotItemVo>();
         if(EmptyUtils.isEmpty(dmItemList)){
-            throw new BaseException(ItemErrorCode.ITEM_NO_DATA);
+            return null;
         }
 
         for (DmItem dmItem:dmItemList){
@@ -109,7 +109,7 @@ public class HomeServiceImpl implements HomeService{
         List<DmItem> dmItemList=restDmItemClient.getDmItemListByMap(param);
         List<HotItemVo> hotItemVoList=new ArrayList<HotItemVo>();
         if(EmptyUtils.isEmpty(dmItemList)){
-            throw new BaseException(ItemErrorCode.ITEM_NO_DATA);
+            return null;
         }
         for (DmItem dmItem:dmItemList){
             HotItemVo hotItemVo=new HotItemVo();
@@ -134,7 +134,7 @@ public class HomeServiceImpl implements HomeService{
         List<DmItem> dmItemList=restDmItemClient.getDmItemListByMap(param);
         List<HotItemVo> hotItemVoList=new ArrayList<HotItemVo>();
         if(EmptyUtils.isEmpty(dmItemList)){
-            throw new BaseException(ItemErrorCode.ITEM_NO_DATA);
+            return null;
         }
         for (DmItem dmItem:dmItemList){
             HotItemVo hotItemVo=new HotItemVo();
@@ -154,7 +154,7 @@ public class HomeServiceImpl implements HomeService{
     public List<DmFloorItems> queryFloorItems() throws Exception {
         List<DmFloorItems> dmFloorItemsList=restDmItemClient.queryItemByFloor();
         if(EmptyUtils.isEmpty(dmFloorItemsList)){
-            throw new BaseException(ItemErrorCode.ITEM_NO_DATA);
+            return null;
         }
         for (DmFloorItems dmFloorItems:dmFloorItemsList){
             for (DmItemVo item:dmFloorItems.getItems()){
@@ -179,7 +179,7 @@ public class HomeServiceImpl implements HomeService{
         param.put("pageSize",10);
         List<DmItem> itemList=restDmItemClient.getDmItemListByMap(param);
         if(EmptyUtils.isEmpty(itemList)){
-            throw new BaseException(ItemErrorCode.ITEM_NO_DATA);
+            return null;
         }
         for (DmItem dmItem:itemList){
             HotItemVo hotItemVo=new HotItemVo();

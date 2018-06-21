@@ -8,8 +8,7 @@ public enum ItemErrorCode implements IErrorCode {
      **/
 
     ITEM_NO_DATA("2001", "没有查询到数据"),
-    IMAGE_NO_Exist("2002", "图片不存在"),
-    ;
+    IMAGE_NO_Exist("2002", "图片不存在");
     private String errorCode;
     private String errorMessage;
 

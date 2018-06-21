@@ -1,5 +1,7 @@
 server:
-  port: 7200
+  port: 7201
+  tomcat:
+    uri-encoding: UTF-8
 spring:
   application:
     name: dm-item-consumer
@@ -18,6 +20,11 @@ spring:
   sleuth:
     sampler:
       percentage: 1.0
+  http:
+    encoding:
+      force: true
+      charset: UTF-8
+      enabled: true
 eureka:
   client:
     service-url:
@@ -31,10 +38,17 @@ hystrix:
       execution:
         isolation:
           thread:
-            timeoutInMilliseconds: 10000
+            timeoutInMilliseconds: 200000
+ribbon:
+  ReadTimeout: 200000
+  ConnectTimeout: 200000
 logging:
   level: debug
 
 feign:
   hystrix:
-    enabled: true #禁用容错处理
+    enabled: false #禁用容错处理
+elasticsearch:
+  ip: 192.168.9.151
+  port: 8300
+  clusterName: elasticsearch-application

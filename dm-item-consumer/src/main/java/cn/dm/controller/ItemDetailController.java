@@ -14,7 +14,7 @@ import java.util.Map;
  * 商品详情页Controller
  */
 @RestController
-@RequestMapping(value = "/api/")
+@RequestMapping(value = "/api")
 public class ItemDetailController {
 
     @Autowired
@@ -30,10 +30,10 @@ public class ItemDetailController {
      * @return
      * @throws Exception
      */
-    @RequestMapping("/queryItemDetail")
+    @RequestMapping(value = "/p/queryItemDetail",method = RequestMethod.POST)
     @ResponseBody
     public Dto<ItemDetailVo> queryItemDetail(@RequestBody Map<String, Object> param) throws Exception {
-        Integer id = (Integer) param.get("id");
+        Integer id=Integer.parseInt(param.get("id").toString());
         return itemDetailService.queryItemDetail((long) id);
     }
 
@@ -45,10 +45,10 @@ public class ItemDetailController {
      * @return
      * @throws Exception
      */
-    @RequestMapping("/queryItemScheduler")
+    @RequestMapping(value = "/p/queryItemScheduler",method = RequestMethod.POST)
     @ResponseBody
     public Dto<List<ItemSchedulerVo>> queryItemScheduler(@RequestBody Map<String, Object> param) throws Exception {
-        Integer id = (Integer) param.get("itemId");
+        Integer id = Integer.parseInt(param.get("itemId").toString());
         return itemDetailService.queryItemScheduler((long) id);
     }
 
@@ -60,11 +60,11 @@ public class ItemDetailController {
      * @return
      * @throws Exception
      */
-    @RequestMapping("/queryItemPrice")
+    @RequestMapping(value = "/p/queryItemPrice",method = RequestMethod.POST)
     @ResponseBody
     public Dto<List<ItemPriceVo>> queryItemPrice(@RequestBody Map<String, Object> param) throws Exception {
-        Integer scheduleId = (Integer) param.get("scheduleId");
-        return itemDetailService.queryItemPrice((long) scheduleId);
+        Integer id = Integer.parseInt(param.get("scheduleId").toString());
+        return itemDetailService.queryItemPrice((long) id);
     }
 
 
@@ -75,10 +75,10 @@ public class ItemDetailController {
      * @return
      * @throws Exception
      */
-    @RequestMapping("/queryItemComment")
+    @RequestMapping(value = "/p/queryItemComment",method = RequestMethod.POST)
     @ResponseBody
     public Dto<List<ItemCommentVo>> queryItemComment(@RequestBody Map<String, Object> param) throws Exception {
-        Integer id = (Integer) param.get("id");
+        Integer id = Integer.parseInt(param.get("id").toString());
         return itemDetailService.queryItemComment((long) id);
     }
 
@@ -90,7 +90,7 @@ public class ItemDetailController {
      * @return
      * @throws Exception
      */
-    @RequestMapping("/queryItemRecommend")
+    @RequestMapping(value = "/p/queryItemRecommend",method = RequestMethod.POST)
     @ResponseBody
     public Dto<List<ParentAndChildVo>> queryItemRecommend(@RequestBody Map<String, Object> param) throws Exception {
         return parentAndChildService.queryItem("itemType2Id", param.get("itemTypeId"), (Integer) param.get("limit"), 1, 1);
@@ -106,11 +106,11 @@ public class ItemDetailController {
      * @return
      * @throws Exception
      */
-    @RequestMapping("/commitItemComment")
+    @RequestMapping(value = "/v/commitItemComment",method = RequestMethod.POST)
     @ResponseBody
     public Dto commitItemComment(@RequestBody Map<String, Object> param) throws Exception {
-        Integer itemId = (Integer) param.get("itemId");
-        Integer userId = (Integer) param.get("userId");
+        Integer itemId = Integer.parseInt(param.get("itemId").toString());
+        Integer userId = Integer.parseInt(param.get("userId").toString());
         return itemDetailService.commitItemComment((long) itemId, (long) userId, (Integer) param.get("score"), (String) param.get("comment"));
     }
 }

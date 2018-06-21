@@ -38,7 +38,7 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
     public Dto<List<SlideShowVo>> querySlideShowPic(Long itemTypeId) throws Exception {
         SlideShowVo slideShowVo = null;
         Dto<List<SlideShowVo>> dto = null;
-        List<DmItem> dmItemList = getItemList("itemType2Id", itemTypeId, 1, 0);
+        List<DmItem> dmItemList = getItemList("itemType1Id", itemTypeId, 1, 5);
         List<SlideShowVo> dataList = new ArrayList<SlideShowVo>();
         for (DmItem item : dmItemList) {
             //获取对应的轮播图信息
@@ -46,7 +46,6 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
             //封装返回数据
             slideShowVo = new SlideShowVo();
             BeanUtils.copyProperties(item, slideShowVo);
-            slideShowVo.setItemTypeId(item.getItemType2Id());
             slideShowVo.setImgUrl(EmptyUtils.isNotEmpty(dmImageList) ? dmImageList.get(0).getImgUrl() : "");
             dataList.add(slideShowVo);
         }
@@ -80,7 +79,7 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
         //根据剧场查询热门节目信息，根据评论数来判定是否热门
         List<Long> cinemaIdList = new ArrayList<Long>();
         if (EmptyUtils.isEmpty(cinemaList)) {
-            throw new BaseException(ItemErrorCode.ITEM_NO_DATA);
+            return null;
         }
         for (DmCinema dmCinema : cinemaList) {
             cinemaIdList.add(dmCinema.getId());
@@ -93,7 +92,7 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
         List<DmItem> dmItemList = restDmItemClient.getHotDmItemList(paramMapHotItem);
         List<ParentAndChildVo> dataList = new ArrayList<ParentAndChildVo>();
         if (EmptyUtils.isEmpty(dmItemList)) {
-            throw new BaseException(ItemErrorCode.ITEM_NO_DATA);
+            return null;
         }
         for (DmItem item : dmItemList) {
             //获取对应的轮播图信息
@@ -107,8 +106,12 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
     }
 
     @Override
-    public Dto<List<MonthVo>> queryItemByMonth(Integer month, Integer year) throws Exception {
-        List<DmItem> dmItemList = restDmItemClient.queryItemByMonth(month, year);
+    public Dto<List<MonthVo>> queryItemByMonth(Integer month, Integer year, Long itemTypeId) throws Exception {
+        Map<String, Object> parmas = new HashMap<String, Object>();
+        parmas.put("month", month);
+        parmas.put("year", year);
+        parmas.put("itemType1Id", itemTypeId);
+        List<DmItem> dmItemList = restDmItemClient.queryItemByMonth(parmas);
         List<MonthVo> monthVoList = new ArrayList<MonthVo>();
         if (EmptyUtils.isEmpty(dmItemList)) {
             return DtoUtil.returnDataSuccess(monthVoList);
@@ -128,7 +131,7 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
                     DmCinema dmCinema = restDmCinemaClient.getDmCinemaById(dmItem.getCinemaId());
                     //组装返回数据
                     parentAndChildVoList.add(copyData(dmItem, dmCinema, dmImageList));
-                    monthVo.setDay(Integer.parseInt(DateUtil.format(dmItem.getStartTime())));
+                    monthVo.setDay(DateUtil.format(dmItem.getStartTime()));
                 }
             }
             monthVo.setItemList(parentAndChildVoList);
@@ -162,7 +165,7 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
         //根据分类查询对应的节目信息
         List<DmItem> dmItemList = restDmItemClient.getDmItemListByMap(paramMapItem);
         if (EmptyUtils.isEmpty(dmItemList)) {
-            throw new BaseException(ItemErrorCode.ITEM_NO_DATA);
+            return null;
         }
         return dmItemList;
     }
@@ -213,7 +216,7 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
         paramMapItem.put("areaId", areaId);
         List<DmCinema> cinemaList = restDmCinemaClient.getDmCinemaListByMap(paramMapItem);
         if (EmptyUtils.isEmpty(cinemaList)) {
-            throw new BaseException(ItemErrorCode.ITEM_NO_DATA);
+            return null;
         }
         return cinemaList;
     }
@@ -228,12 +231,11 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
      */
     public ParentAndChildVo copyData(DmItem dmItem, DmCinema dmCinema, List<DmImage> dmImageList) throws ParseException {
         ParentAndChildVo parentAndChildVo = new ParentAndChildVo();
+        BeanUtils.copyProperties(dmCinema, parentAndChildVo);
         BeanUtils.copyProperties(dmItem, parentAndChildVo);
-        parentAndChildVo.setItemTypeId(dmItem.getItemType2Id());
         parentAndChildVo.setStartDate(DateUtil.format(dmItem.getStartTime()));
         parentAndChildVo.setEndDate(DateUtil.format(dmItem.getEndTime()));
         parentAndChildVo.setImgUrl(EmptyUtils.isNotEmpty(dmImageList) ? dmImageList.get(0).getImgUrl() : "");
-        BeanUtils.copyProperties(dmCinema, parentAndChildVo);
         return parentAndChildVo;
     }
 }

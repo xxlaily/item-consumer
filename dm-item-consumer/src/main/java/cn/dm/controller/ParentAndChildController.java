@@ -16,7 +16,7 @@ import java.util.Map;
  * 亲子首页Controller
  */
 @RestController
-@RequestMapping(value = "/api/")
+@RequestMapping(value = "/api/p")
 public class ParentAndChildController {
 
     @Autowired
@@ -31,24 +31,39 @@ public class ParentAndChildController {
      */
     @RequestMapping(value = "/querySlideShowPic", method = RequestMethod.POST)
     public Dto<List<SlideShowVo>> querySlideShowPic(@RequestBody Map<String, Object> param, HttpServletResponse response) throws Exception {
-        Integer itemTypeId = (Integer) param.get("itemTypeId");
+        Integer itemTypeId = Integer.parseInt(param.get("itemTypeId").toString());
         return parentAndChildService.querySlideShowPic((long) itemTypeId);
     }
 
 
     /**
-     * 亲子首页 猜你喜欢接口 和 精彩聚焦接口 （复用）
+     * 亲子首页精彩聚焦接口
      *
      * @param param-itemTypeId 商品分类主键
      * @param param-limit      请求数目
      * @return
      * @throws Exception
      */
-    @RequestMapping(value = "/queryItemLikeOrNice", method = RequestMethod.POST)
+    @RequestMapping(value = "/queryItemNice", method = RequestMethod.POST)
     @ResponseBody
-    public Dto<List<ParentAndChildVo>> queryItemLikeOrNice(@RequestBody Map<String, Object> param) throws Exception {
-        return parentAndChildService.queryItem("itemType2Id", param.get("itemTypeId"), (Integer) param.get("limit"), 0, 1);
+    public Dto<List<ParentAndChildVo>> queryItemNice(@RequestBody Map<String, Object> param) throws Exception {
+        return parentAndChildService.queryItem("itemType1Id", param.get("itemTypeId"), Integer.parseInt(param.get("limit").toString()), 0, 1);
     }
+
+    /**
+     * 亲子首页猜你喜欢接口
+     *
+     * @param param-itemTypeId 商品分类主键
+     * @param param-limit      请求数目
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/queryItemLike", method = RequestMethod.POST)
+    @ResponseBody
+    public Dto<List<ParentAndChildVo>> queryItemLike(@RequestBody Map<String, Object> param) throws Exception {
+        return parentAndChildService.queryItem("itemTypeId", param.get("itemTypeId"), Integer.parseInt(param.get("limit").toString()), 0, 1);
+    }
+
 
     /**
      * 亲子首页 根据年龄段查询节目
@@ -61,7 +76,7 @@ public class ParentAndChildController {
     @RequestMapping(value = "/queryItemByAge", method = RequestMethod.POST)
     @ResponseBody
     public Dto<List<ParentAndChildVo>> queryItemByAge(@RequestBody Map<String, Object> param) throws Exception {
-        return parentAndChildService.queryItem("ageGroup", param.get("ageGroup"), (Integer) param.get("limit"), 0, 1);
+        return parentAndChildService.queryItem("ageGroup", param.get("ageGroup"), Integer.parseInt(param.get("limit").toString()), 0, 1);
     }
 
 
@@ -76,7 +91,7 @@ public class ParentAndChildController {
     @RequestMapping(value = "/queryItemHot", method = RequestMethod.POST)
     @ResponseBody
     public Dto<List<ParentAndChildVo>> queryItemHot(@RequestBody Map<String, Object> param) throws Exception {
-        Integer areaId = (Integer) param.get("areaId");
+        Integer areaId = Integer.parseInt(param.get("areaId").toString());
         return parentAndChildService.queryItemHot((long) areaId, (Integer) param.get("limit"));
     }
 
@@ -92,7 +107,10 @@ public class ParentAndChildController {
     @RequestMapping(value = "/queryItemByMonth", method = RequestMethod.POST)
     @ResponseBody
     public Dto<List<MonthVo>> queryItemByMonth(@RequestBody Map<String, Object> param) throws Exception {
-        return parentAndChildService.queryItemByMonth((Integer) param.get("month"), (Integer) param.get("year"));
+        Integer month = Integer.parseInt(param.get("month").toString());
+        Integer year = Integer.parseInt(param.get("year").toString());
+        Long itemTypeId = Long.parseLong(param.get("itemTypeId").toString());
+        return parentAndChildService.queryItemByMonth(month, year, itemTypeId);
     }
 
     /**
@@ -106,8 +124,9 @@ public class ParentAndChildController {
     @RequestMapping(value = "/queryAdvertising", method = RequestMethod.POST)
     @ResponseBody
     public Dto<List<ParentAndChildVo>> queryAdvertising(@RequestBody Map<String, Object> param) throws Exception {
-        Integer itemTypeId = (Integer) param.get("itemTypeId");
-        return parentAndChildService.queryItem("itemType2Id", (long) itemTypeId, (Integer) param.get("limit"), 0, 0);
+        Long itemTypeId = Long.parseLong(param.get("itemTypeId").toString());
+        Integer limit = Integer.parseInt(param.get("limit").toString());
+        return parentAndChildService.queryItem("itemType1Id", itemTypeId, limit, 0, 0);
     }
 
 

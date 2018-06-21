@@ -8,10 +8,6 @@ import cn.dm.service.HomeService;
 import cn.dm.vo.DmFloorItems;
 import cn.dm.vo.DmItemTypeVo;
 import cn.dm.vo.HotItemVo;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -24,7 +20,7 @@ import java.util.*;
  * 主页Controller
  */
 @RestController
-@RequestMapping("/api/index")
+@RequestMapping("/api/p/index")
 public class HomeController {
 
     @Resource
@@ -100,62 +96,74 @@ public class HomeController {
        return DtoUtil.returnDataSuccess(hotItemVoList);
     }
 
-    @RequestMapping(value = "/crawler",method = RequestMethod.GET)
-    public void crawler(){
-        String url="https://www.damai.cn/alltickets.html?spm=a2o6e.home.0.0.46e148d3ilEf57";
-        try {
-            Random rand = new Random();
-            Document document=Jsoup.connect(url).get();
-            Elements elements=document.select("div[class=item mt20]>table>tbody>tr>td[class=name]>a");
-            for (Element element:elements){
-                String dUrl=element.absUrl("href");
-                Document dDocument=Jsoup.connect(dUrl).get();
-                DmItem dmItem=new DmItem();
-                dmItem.setItemName(dDocument.select("h2[class=tt]>span[class=txt]").text());
-                dmItem.setAbstractMessage(dDocument.select("div[class=m-goods]>h3[class=stt]>span[class=txt]").text());
-                dmItem.setBasicDescription(dDocument.select("div[class=table-info]").get(0).outerHtml());
-                dmItem.setReminderDescription(dDocument.select("div[class=table-info]").get(1).outerHtml());
-                dmItem.setProjectDescription(dDocument.select("div[class=pre]").get(0).outerHtml());
-                dmItem.setLongitude("116.38");
-                dmItem.setLatitude("39.90");
+//    @RequestMapping(value = "/crawler",method = RequestMethod.GET)
+//    public void crawler(){
+//        String url="https://www.damai.cn/alltickets.html?spm=a2o6e.home.0.0.46e148d3ilEf57";
+//        try {
+//            Random rand = new Random();
+//            Document document=Jsoup.connect(url).get();
+//            Elements elements=document.select("div[class=item mt20]>table>tbody>tr>td[class=name]>a");
+//            for (Element element:elements){
+//                String dUrl=element.absUrl("href");
+//                Document dDocument=Jsoup.connect(dUrl).get();
+//                DmItem dmItem=new DmItem();
+//                dmItem.setItemName(dDocument.select("h2[class=tt]>span[class=txt]").text());
+//                dmItem.setAbstractMessage(dDocument.select("div[class=m-goods]>h3[class=stt]>span[class=txt]").text());
+//                dmItem.setBasicDescription(dDocument.select("div[class=table-info]").get(0).outerHtml());
+//                dmItem.setReminderDescription(dDocument.select("div[class=table-info]").get(1).outerHtml());
+//                dmItem.setProjectDescription(dDocument.select("div[class=pre]").get(0).outerHtml());
+//                dmItem.setLongitude("116.38");
+//                dmItem.setLatitude("39.90");
+//
+//                Calendar calendar   =   new GregorianCalendar();
+//                calendar.setTime(new Date());
+//                calendar.add(calendar.DATE,rand.nextInt(300));
+//
+//                dmItem.setStartTime(calendar.getTime());
+//
+//                calendar.add(calendar.DATE,rand.nextInt(300));
+//                dmItem.setEndTime(calendar.getTime());
+//
+//                dmItem.setMinPrice(new Long(rand.nextInt(300) + 100)*1.0);
+//                dmItem.setMaxPrice(dmItem.getMinPrice()+new Long(rand.nextInt(1000) + 100));
+//
+//                dmItem.setState(rand.nextInt(4) + 1);
+//                dmItem.setAgeGroup(rand.nextInt(4) + 0);
+//                dmItem.setIsBanner(rand.nextInt(1) + 0);
+//                dmItem.setIsRecommend(rand.nextInt(1) + 0);
+//
+//                dmItem.setItemType1Id(new Long(rand.nextInt(9) + 1));
+//                if(dmItem.getItemType1Id()==1){
+//                    dmItem.setItemType2Id(new Long(rand.nextInt(4) + 10));
+//                }else if(dmItem.getItemType1Id()==2){
+//                    dmItem.setItemType2Id(new Long(rand.nextInt(3) + 14));
+//                }else if(dmItem.getItemType1Id()==3){
+//                    dmItem.setItemType2Id(new Long(rand.nextInt(5) + 17));
+//                }else if(dmItem.getItemType1Id()==4){
+//                    dmItem.setItemType2Id(new Long(rand.nextInt(5) + 22));
+//                }else if(dmItem.getItemType1Id()==5){
+//                    dmItem.setItemType2Id(new Long(rand.nextInt(3) + 27));
+//                }else if(dmItem.getItemType1Id()==6){
+//                    dmItem.setItemType2Id(new Long(rand.nextInt(3) + 30));
+//                }else if(dmItem.getItemType1Id()==7){
+//                    dmItem.setItemType2Id(new Long(rand.nextInt(5) + 33));
+//                }
+//                homeService.addItem(dmItem);
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
-                Calendar calendar   =   new GregorianCalendar();
-                calendar.setTime(new Date());
-                calendar.add(calendar.DATE,rand.nextInt(300));
-
-                dmItem.setStartTime(calendar.getTime());
-
-                calendar.add(calendar.DATE,rand.nextInt(300));
-                dmItem.setEndTime(calendar.getTime());
-
-                dmItem.setMinPrice(new Long(rand.nextInt(300) + 100)*1.0);
-                dmItem.setMaxPrice(dmItem.getMinPrice()+new Long(rand.nextInt(1000) + 100));
-
-                dmItem.setState(rand.nextInt(4) + 1);
-                dmItem.setAgeGroup(rand.nextInt(4) + 0);
-                dmItem.setIsBanner(rand.nextInt(1) + 0);
-                dmItem.setIsRecommend(rand.nextInt(1) + 0);
-
-                dmItem.setItemType1Id(new Long(rand.nextInt(9) + 1));
-                if(dmItem.getItemType1Id()==1){
-                    dmItem.setItemType2Id(new Long(rand.nextInt(4) + 10));
-                }else if(dmItem.getItemType1Id()==2){
-                    dmItem.setItemType2Id(new Long(rand.nextInt(3) + 14));
-                }else if(dmItem.getItemType1Id()==3){
-                    dmItem.setItemType2Id(new Long(rand.nextInt(5) + 17));
-                }else if(dmItem.getItemType1Id()==4){
-                    dmItem.setItemType2Id(new Long(rand.nextInt(5) + 22));
-                }else if(dmItem.getItemType1Id()==5){
-                    dmItem.setItemType2Id(new Long(rand.nextInt(3) + 27));
-                }else if(dmItem.getItemType1Id()==6){
-                    dmItem.setItemType2Id(new Long(rand.nextInt(3) + 30));
-                }else if(dmItem.getItemType1Id()==7){
-                    dmItem.setItemType2Id(new Long(rand.nextInt(5) + 33));
-                }
-                homeService.addItem(dmItem);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+//    @RequestMapping(value = "/test",method = RequestMethod.GET)
+//    public String test(){
+//        String fileEncode = System.getProperty("file.encoding");
+//        System.out.println("fileEncode1:"+fileEncode);
+//        System.setProperty("file.encoding","UTF-8");
+//        fileEncode = System.getProperty("file.encoding");
+//        System.out.println("fileEncode2:"+fileEncode);
+//        String message="你猜我是谁哈";
+//        System.out.println(message);
+//        return message;
+//    }
 }
