@@ -165,7 +165,7 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
         //根据分类查询对应的节目信息
         List<DmItem> dmItemList = restDmItemClient.getDmItemListByMap(paramMapItem);
         if (EmptyUtils.isEmpty(dmItemList)) {
-            return null;
+            throw new BaseException(ItemErrorCode.ITEM_NO_DATA);
         }
         return dmItemList;
     }
@@ -184,8 +184,7 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
         paramMapImage.put("type", type);
         //图片类型为1，代表查询商品图片
         paramMapImage.put("category", 1);
-        List<DmImage> dmImageList = restDmImageClient.getDmImageListByMap(paramMapImage);
-        return dmImageList;
+        return restDmImageClient.getDmImageListByMap(paramMapImage);
     }
 
     /**
@@ -216,7 +215,7 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
         paramMapItem.put("areaId", areaId);
         List<DmCinema> cinemaList = restDmCinemaClient.getDmCinemaListByMap(paramMapItem);
         if (EmptyUtils.isEmpty(cinemaList)) {
-            return null;
+            throw new BaseException(ItemErrorCode.ITEM_NO_DATA);
         }
         return cinemaList;
     }

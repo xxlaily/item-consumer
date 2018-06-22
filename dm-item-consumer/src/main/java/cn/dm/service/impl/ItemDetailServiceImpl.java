@@ -9,6 +9,7 @@ import cn.dm.vo.ItemCommentVo;
 import cn.dm.vo.ItemDetailVo;
 import cn.dm.vo.ItemPriceVo;
 import cn.dm.vo.ItemSchedulerVo;
+import org.apache.activemq.kaha.impl.data.Item;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -68,8 +69,8 @@ public class ItemDetailServiceImpl implements ItemDetailService {
         Map<String, Object> param = new HashMap<String, Object>();
         param.put("itemId", dmItem.getId());
         List<DmScheduler> dmSchedulerList = restDmSchedulerClient.getDmSchedulerListByMap(param);
-        if (EmptyUtils.isEmpty(dmSchedulerList) || EmptyUtils.isEmpty(dmSchedulerList)) {
-            return null;
+        if (EmptyUtils.isEmpty(dmSchedulerList)) {
+            throw new BaseException(ItemErrorCode.ITEM_NO_DATA);
         }
         //组装返回数据
         for (int i = 0; i < dmSchedulerList.size(); i++) {
@@ -171,8 +172,7 @@ public class ItemDetailServiceImpl implements ItemDetailService {
         }
         //图片类型为1，代表查询商品图片
         paramMapImage.put("category", category);
-        List<DmImage> dmImageList = restDmImageClient.getDmImageListByMap(paramMapImage);
-        return dmImageList;
+        return restDmImageClient.getDmImageListByMap(paramMapImage);
     }
 
     /**
