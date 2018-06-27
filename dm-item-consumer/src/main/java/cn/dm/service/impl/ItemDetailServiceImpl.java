@@ -9,6 +9,8 @@ import cn.dm.vo.ItemCommentVo;
 import cn.dm.vo.ItemDetailVo;
 import cn.dm.vo.ItemPriceVo;
 import cn.dm.vo.ItemSchedulerVo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -43,8 +45,11 @@ public class ItemDetailServiceImpl implements ItemDetailService {
     @Autowired
     private RedisUtils redisUtils;
 
+    private static final Logger logger = LoggerFactory.getLogger(ItemDetailServiceImpl.class);
+
     @Override
     public Dto<ItemDetailVo> queryItemDetail(Long id) throws Exception {
+        logger.info("[queryItemDetail]开始查询id为" + id + "的商品详细信息");
         //查询对应ID的商品
         DmItem dmItem = restDmItemClient.getDmItemById(id);
         if (EmptyUtils.isEmpty(dmItem)) {
@@ -61,6 +66,7 @@ public class ItemDetailServiceImpl implements ItemDetailService {
 
     @Override
     public Dto<List<ItemSchedulerVo>> queryItemScheduler(Long id) throws Exception {
+        logger.info("[queryItemScheduler]开始查询id为" + id + "的商品排期");
         List<ItemSchedulerVo> resultList = new ArrayList<ItemSchedulerVo>();
         //查询对应ID的商品
         DmItem dmItem = restDmItemClient.getDmItemById(id);
@@ -88,6 +94,7 @@ public class ItemDetailServiceImpl implements ItemDetailService {
 
     @Override
     public Dto<List<ItemPriceVo>> queryItemPrice(Long scheduleId) throws Exception {
+        logger.info("[queryItemPrice]开始查询id为" + scheduleId + "的排期价格");
         Map<String, Object> paramMap = new HashMap<String, Object>();
         paramMap.put("scheduleId", scheduleId);
         //根据排期ID获取排期价格信息
@@ -113,6 +120,7 @@ public class ItemDetailServiceImpl implements ItemDetailService {
 
     @Override
     public Dto<List<ItemCommentVo>> queryItemComment(Long itemId) throws Exception {
+        logger.info("[queryItemComment]开始查询id为" + itemId + "的商品评论");
         //根据商品ID获取所有的剧评
         Map<String, Object> paramMapComment = new HashMap<String, Object>();
         paramMapComment.put("itemId", itemId);
