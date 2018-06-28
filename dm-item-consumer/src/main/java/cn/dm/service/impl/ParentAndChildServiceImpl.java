@@ -12,6 +12,8 @@ import cn.dm.service.ParentAndChildService;
 import cn.dm.vo.MonthVo;
 import cn.dm.vo.ParentAndChildVo;
 import cn.dm.vo.SlideShowVo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,7 +26,7 @@ import java.util.*;
  */
 @Component
 public class ParentAndChildServiceImpl implements ParentAndChildService {
-
+    private static final Logger logger = LoggerFactory.getLogger(ParentAndChildServiceImpl.class);
     @Autowired
     private RestDmItemClient restDmItemClient;
 
@@ -44,8 +46,9 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
         List<DmItem> dmItemList = getItemList("itemType1Id", itemTypeId, 1, 5);
         List<SlideShowVo> dataList = new ArrayList<SlideShowVo>();
         for (DmItem item : dmItemList) {
+            logger.info("[querySlideShowPic]" + "dmItemList size>>>>>>>>>>>>>>>"+dmItemList.size());
             //获取对应的轮播图信息
-            String imgUrl = getImageUrl(restDmImageClient, item.getId(), Constants.Image.ImageType.carousel, Constants.Image.ImageCategory.item);
+            String imgUrl = getImageUrl(restDmImageClient, item.getId(), Constants.Image.ImageType.normal, Constants.Image.ImageCategory.item);
             //封装返回数据
             slideShowVo = new SlideShowVo();
             BeanUtils.copyProperties(item, slideShowVo);
@@ -65,7 +68,7 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
         Map<String, Object> paramMapCinema = new HashMap<String, Object>();
         for (DmItem item : dmItemList) {
             //获取对应的轮播图信息
-            String imgUrl = getImageUrl(restDmImageClient, item.getId(), Constants.Image.ImageType.carousel, Constants.Image.ImageCategory.item);
+            String imgUrl = getImageUrl(restDmImageClient, item.getId(), Constants.Image.ImageType.normal, Constants.Image.ImageCategory.item);
             //获取剧场信息
             paramMapCinema.put("cinemaId", item.getCinemaId());
             DmCinema dmCinema = restDmCinemaClient.getDmCinemaById(item.getCinemaId());
@@ -99,7 +102,7 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
         }
         for (DmItem item : dmItemList) {
             //获取对应的轮播图信息
-            String imgUrl = getImageUrl(restDmImageClient, item.getId(), Constants.Image.ImageType.carousel, Constants.Image.ImageCategory.item);
+            String imgUrl = getImageUrl(restDmImageClient, item.getId(), Constants.Image.ImageType.normal, Constants.Image.ImageCategory.item);
             //获取剧场信息
             DmCinema dmCinema = getCinemaById(cinemaList, item.getCinemaId());
             //封装返回数据
@@ -129,7 +132,7 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
                 c.setTime(dmItem.getStartTime());
                 if (c.get(Calendar.DAY_OF_MONTH) == i) {
                     //获取对应的轮播图信息
-                    String imgUrl = getImageUrl(restDmImageClient, dmItem.getId(), Constants.Image.ImageType.carousel, Constants.Image.ImageCategory.item);
+                    String imgUrl = getImageUrl(restDmImageClient, dmItem.getId(), Constants.Image.ImageType.normal, Constants.Image.ImageCategory.item);
                     //获取剧场信息
                     DmCinema dmCinema = restDmCinemaClient.getDmCinemaById(dmItem.getCinemaId());
                     //组装返回数据
