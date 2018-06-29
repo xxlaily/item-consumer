@@ -12,6 +12,8 @@ import cn.dm.service.ParentAndChildService;
 import cn.dm.vo.MonthVo;
 import cn.dm.vo.ParentAndChildVo;
 import cn.dm.vo.SlideShowVo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -24,7 +26,7 @@ import java.util.*;
  */
 @Component
 public class ParentAndChildServiceImpl implements ParentAndChildService {
-
+    private static final Logger logger = LoggerFactory.getLogger(ParentAndChildServiceImpl.class);
     @Autowired
     private RestDmItemClient restDmItemClient;
 
@@ -34,6 +36,9 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
     @Autowired
     private RestDmCinemaClient restDmCinemaClient;
 
+    @Autowired
+    private RedisUtils redisUtils;
+
     @Override
     public Dto<List<SlideShowVo>> querySlideShowPic(Long itemTypeId) throws Exception {
         SlideShowVo slideShowVo = null;
@@ -41,12 +46,13 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
         List<DmItem> dmItemList = getItemList("itemType1Id", itemTypeId, 1, 5);
         List<SlideShowVo> dataList = new ArrayList<SlideShowVo>();
         for (DmItem item : dmItemList) {
+            logger.info("[querySlideShowPic]" + "dmItemList size>>>>>>>>>>>>>>>"+dmItemList.size());
             //获取对应的轮播图信息
-            List<DmImage> dmImageList = getImageList(item.getId(), 1);
+            String imgUrl = getImageUrl(restDmImageClient, item.getId(), Constants.Image.ImageType.normal, Constants.Image.ImageCategory.item);
             //封装返回数据
             slideShowVo = new SlideShowVo();
             BeanUtils.copyProperties(item, slideShowVo);
-            slideShowVo.setImgUrl(EmptyUtils.isNotEmpty(dmImageList) ? dmImageList.get(0).getImgUrl() : "");
+            slideShowVo.setImgUrl(imgUrl);
             dataList.add(slideShowVo);
         }
         dto = DtoUtil.returnDataSuccess(dataList);
@@ -62,12 +68,12 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
         Map<String, Object> paramMapCinema = new HashMap<String, Object>();
         for (DmItem item : dmItemList) {
             //获取对应的轮播图信息
-            List<DmImage> dmImageList = getImageList(item.getId(), type);
+            String imgUrl = getImageUrl(restDmImageClient, item.getId(), Constants.Image.ImageType.normal, Constants.Image.ImageCategory.item);
             //获取剧场信息
             paramMapCinema.put("cinemaId", item.getCinemaId());
             DmCinema dmCinema = restDmCinemaClient.getDmCinemaById(item.getCinemaId());
             //封装返回数据
-            parentAndChildVo = copyData(item, dmCinema, dmImageList);
+            parentAndChildVo = copyData(item, dmCinema, imgUrl);
             dataList.add(parentAndChildVo);
         }
         return DtoUtil.returnDataSuccess(dataList);
@@ -96,11 +102,11 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
         }
         for (DmItem item : dmItemList) {
             //获取对应的轮播图信息
-            List<DmImage> dmImageList = getImageList(item.getId(), 1);
+            String imgUrl = getImageUrl(restDmImageClient, item.getId(), Constants.Image.ImageType.normal, Constants.Image.ImageCategory.item);
             //获取剧场信息
             DmCinema dmCinema = getCinemaById(cinemaList, item.getCinemaId());
             //封装返回数据
-            dataList.add(copyData(item, dmCinema, dmImageList));
+            dataList.add(copyData(item, dmCinema, imgUrl));
         }
         return DtoUtil.returnDataSuccess(dataList);
     }
@@ -126,11 +132,11 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
                 c.setTime(dmItem.getStartTime());
                 if (c.get(Calendar.DAY_OF_MONTH) == i) {
                     //获取对应的轮播图信息
-                    List<DmImage> dmImageList = getImageList(dmItem.getId(), 1);
+                    String imgUrl = getImageUrl(restDmImageClient, dmItem.getId(), Constants.Image.ImageType.normal, Constants.Image.ImageCategory.item);
                     //获取剧场信息
                     DmCinema dmCinema = restDmCinemaClient.getDmCinemaById(dmItem.getCinemaId());
                     //组装返回数据
-                    parentAndChildVoList.add(copyData(dmItem, dmCinema, dmImageList));
+                    parentAndChildVoList.add(copyData(dmItem, dmCinema, imgUrl));
                     monthVo.setDay(DateUtil.format(dmItem.getStartTime()));
                 }
             }
@@ -165,27 +171,33 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
         //根据分类查询对应的节目信息
         List<DmItem> dmItemList = restDmItemClient.getDmItemListByMap(paramMapItem);
         if (EmptyUtils.isEmpty(dmItemList)) {
-            return null;
+            throw new BaseException(ItemErrorCode.ITEM_NO_DATA);
         }
         return dmItemList;
     }
 
     /**
-     * 获取图片信息
+     * 查询图片信息
      *
-     * @param targetId
+     * @param restDmImageClient
      * @param type
+     * @param category
      * @return
-     * @throws Exception
      */
-    public List<DmImage> getImageList(Long targetId, Integer type) throws Exception {
-        Map<String, Object> paramMapImage = new HashMap<String, Object>();
-        paramMapImage.put("targetId", targetId);
-        paramMapImage.put("type", type);
-        //图片类型为1，代表查询商品图片
-        paramMapImage.put("category", 1);
-        List<DmImage> dmImageList = restDmImageClient.getDmImageListByMap(paramMapImage);
-        return dmImageList;
+    public String getImageUrl(RestDmImageClient restDmImageClient, Long id, Integer type, Integer category) {
+        //查询图片信息
+        List<DmImage> dmImageList = null;
+        //从reidis中获取图片信息
+        String key = Constants.IMAGE_TOKEN_PREFIX + id + "_" + type + "_" + category;
+        String imgUrl = (String) redisUtils.get(key);
+        //如果redis中没有,则到数据库中获取
+        if (EmptyUtils.isEmpty(imgUrl)) {
+            dmImageList = restDmImageClient.queryDmImageList(id, type, category);
+            imgUrl = dmImageList.get(0).getImgUrl();
+            //同步图片到redis
+            redisUtils.set(key, imgUrl);
+        }
+        return imgUrl;
     }
 
     /**
@@ -216,7 +228,7 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
         paramMapItem.put("areaId", areaId);
         List<DmCinema> cinemaList = restDmCinemaClient.getDmCinemaListByMap(paramMapItem);
         if (EmptyUtils.isEmpty(cinemaList)) {
-            return null;
+            throw new BaseException(ItemErrorCode.ITEM_NO_DATA);
         }
         return cinemaList;
     }
@@ -226,16 +238,16 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
      *
      * @param dmItem
      * @param dmCinema
-     * @param dmImageList
+     * @param imgUrl
      * @return
      */
-    public ParentAndChildVo copyData(DmItem dmItem, DmCinema dmCinema, List<DmImage> dmImageList) throws ParseException {
+    public ParentAndChildVo copyData(DmItem dmItem, DmCinema dmCinema, String imgUrl) throws ParseException {
         ParentAndChildVo parentAndChildVo = new ParentAndChildVo();
         BeanUtils.copyProperties(dmCinema, parentAndChildVo);
         BeanUtils.copyProperties(dmItem, parentAndChildVo);
         parentAndChildVo.setStartDate(DateUtil.format(dmItem.getStartTime()));
         parentAndChildVo.setEndDate(DateUtil.format(dmItem.getEndTime()));
-        parentAndChildVo.setImgUrl(EmptyUtils.isNotEmpty(dmImageList) ? dmImageList.get(0).getImgUrl() : "");
+        parentAndChildVo.setImgUrl(imgUrl);
         return parentAndChildVo;
     }
 }

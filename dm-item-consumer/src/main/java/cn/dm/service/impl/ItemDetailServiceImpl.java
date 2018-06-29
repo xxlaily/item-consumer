@@ -9,6 +9,8 @@ import cn.dm.vo.ItemCommentVo;
 import cn.dm.vo.ItemDetailVo;
 import cn.dm.vo.ItemPriceVo;
 import cn.dm.vo.ItemSchedulerVo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,36 +42,43 @@ public class ItemDetailServiceImpl implements ItemDetailService {
     @Autowired
     private RestDmUserClient dmUserClient;
 
+    @Autowired
+    private RedisUtils redisUtils;
+
+    private static final Logger logger = LoggerFactory.getLogger(ItemDetailServiceImpl.class);
+
     @Override
     public Dto<ItemDetailVo> queryItemDetail(Long id) throws Exception {
+        logger.info("[queryItemDetail]开始查询id为" + id + "的商品详细信息");
         //查询对应ID的商品
         DmItem dmItem = restDmItemClient.getDmItemById(id);
-        if(EmptyUtils.isEmpty(dmItem)){
+        if (EmptyUtils.isEmpty(dmItem)) {
             return null;
         }
         //查询图片信息
-        List<DmImage> dmImageList = getImageList(dmItem.getId(), 1, 1, false);
+        String imgUrl = getImageUrl(restDmImageClient, dmItem.getId(), Constants.Image.ImageType.carousel, Constants.Image.ImageCategory.item);
         //获取剧场信息
         DmCinema dmCinema = restDmCinemaClient.getDmCinemaById(dmItem.getCinemaId());
         //组装返回数据
-        ItemDetailVo itemDetailVo = copyData(dmItem, dmCinema, dmImageList);
+        ItemDetailVo itemDetailVo = copyData(dmItem, dmCinema, imgUrl);
         return DtoUtil.returnDataSuccess(itemDetailVo);
     }
 
     @Override
     public Dto<List<ItemSchedulerVo>> queryItemScheduler(Long id) throws Exception {
+        logger.info("[queryItemScheduler]开始查询id为" + id + "的商品排期");
         List<ItemSchedulerVo> resultList = new ArrayList<ItemSchedulerVo>();
         //查询对应ID的商品
         DmItem dmItem = restDmItemClient.getDmItemById(id);
-        if(EmptyUtils.isEmpty(dmItem)){
+        if (EmptyUtils.isEmpty(dmItem)) {
             return null;
         }
         //查询对应的排期列表
         Map<String, Object> param = new HashMap<String, Object>();
         param.put("itemId", dmItem.getId());
         List<DmScheduler> dmSchedulerList = restDmSchedulerClient.getDmSchedulerListByMap(param);
-        if (EmptyUtils.isEmpty(dmSchedulerList) || EmptyUtils.isEmpty(dmSchedulerList)) {
-            return null;
+        if (EmptyUtils.isEmpty(dmSchedulerList)) {
+            throw new BaseException(ItemErrorCode.ITEM_NO_DATA);
         }
         //组装返回数据
         for (int i = 0; i < dmSchedulerList.size(); i++) {
@@ -85,6 +94,7 @@ public class ItemDetailServiceImpl implements ItemDetailService {
 
     @Override
     public Dto<List<ItemPriceVo>> queryItemPrice(Long scheduleId) throws Exception {
+        logger.info("[queryItemPrice]开始查询id为" + scheduleId + "的排期价格");
         Map<String, Object> paramMap = new HashMap<String, Object>();
         paramMap.put("scheduleId", scheduleId);
         //根据排期ID获取排期价格信息
@@ -110,6 +120,7 @@ public class ItemDetailServiceImpl implements ItemDetailService {
 
     @Override
     public Dto<List<ItemCommentVo>> queryItemComment(Long itemId) throws Exception {
+        logger.info("[queryItemComment]开始查询id为" + itemId + "的商品评论");
         //根据商品ID获取所有的剧评
         Map<String, Object> paramMapComment = new HashMap<String, Object>();
         paramMapComment.put("itemId", itemId);
@@ -128,11 +139,8 @@ public class ItemDetailServiceImpl implements ItemDetailService {
                 itemCommentVo.setUserName(dmUser.getNickName());
             }
             //获取用户头像
-            List<DmImage> dmImageList = getImageList(dmItemComment.getUserId(), 0, 0, true);
-            if (EmptyUtils.isNotEmpty(dmImageList)) {
-                itemCommentVo.setImgUrl(EmptyUtils.isNotEmpty(dmImageList) ? dmImageList.get(0).getImgUrl() : ""
-                );
-            }
+            String imgUrl = getImageUrl(restDmImageClient, dmItemComment.getUserId(), Constants.Image.ImageType.normal, Constants.Image.ImageCategory.user);
+            itemCommentVo.setImgUrl(imgUrl);
             itemCommentVo.setCreatedTime(DateUtil.format(dmItemComment.getCreatedTime()));
             itemCommentVoList.add(itemCommentVo);
         }
@@ -171,30 +179,54 @@ public class ItemDetailServiceImpl implements ItemDetailService {
         }
         //图片类型为1，代表查询商品图片
         paramMapImage.put("category", category);
-        List<DmImage> dmImageList = restDmImageClient.getDmImageListByMap(paramMapImage);
-        return dmImageList;
+        return restDmImageClient.queryDmImageList(targetId, type, category);
     }
+
 
     /**
      * 统一封装VO格式返回数据
      *
      * @param dmItem
      * @param dmCinema
-     * @param dmImageList
+     * @param imgUrl
      * @return
      */
-    public ItemDetailVo copyData(DmItem dmItem, DmCinema dmCinema, List<DmImage> dmImageList) throws ParseException {
+    public ItemDetailVo copyData(DmItem dmItem, DmCinema dmCinema, String imgUrl) throws ParseException {
         ItemDetailVo itemDetailVo = new ItemDetailVo();
         BeanUtils.copyProperties(dmItem, itemDetailVo);
         itemDetailVo.setStartTime(DateUtil.format(dmItem.getStartTime()));
         itemDetailVo.setEndTime(DateUtil.format(dmItem.getEndTime()));
         itemDetailVo.setState(dmItem.getState() + "");
-        itemDetailVo.setImgUrl(EmptyUtils.isNotEmpty(dmImageList) ? dmImageList.get(0).getImgUrl() : "");
+        itemDetailVo.setImgUrl(imgUrl);
         if (EmptyUtils.isNotEmpty(dmCinema)) {
             BeanUtils.copyProperties(dmCinema, itemDetailVo);
         }
         itemDetailVo.setId(dmItem.getId());
         itemDetailVo.setCommentCount(dmItem.getCommentCount());
         return itemDetailVo;
+    }
+
+    /**
+     * 查询图片信息
+     *
+     * @param restDmImageClient
+     * @param type
+     * @param category
+     * @return
+     */
+    public String getImageUrl(RestDmImageClient restDmImageClient, Long id, Integer type, Integer category) {
+        //查询图片信息
+        List<DmImage> dmImageList = null;
+        //从reidis中获取图片信息
+        String key = Constants.IMAGE_TOKEN_PREFIX + id + "_" + type + "_" + category;
+        String imgUrl = (String) redisUtils.get(key);
+        //如果redis中没有,则到数据库中获取
+        if (EmptyUtils.isEmpty(imgUrl)) {
+            dmImageList = restDmImageClient.queryDmImageList(id, type, category);
+            imgUrl = dmImageList.get(0).getImgUrl();
+            //同步图片到redis
+            redisUtils.set(key, imgUrl);
+        }
+        return imgUrl;
     }
 }
