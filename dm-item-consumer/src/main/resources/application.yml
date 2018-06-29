@@ -1,5 +1,5 @@
 server:
-  port: 7201
+  port: 7200
   tomcat:
     uri-encoding: UTF-8
 spring:
@@ -48,7 +48,3 @@ logging:
 feign:
   hystrix:
     enabled: false #禁用容错处理
-elasticsearch:
-  ip: 192.168.9.151
-  port: 8300
-  clusterName: elasticsearch-application
