@@ -56,7 +56,7 @@ public class ItemDetailServiceImpl implements ItemDetailService {
             return null;
         }
         //查询图片信息
-        String imgUrl = getImageUrl(restDmImageClient, dmItem.getId(), Constants.Image.ImageType.carousel, Constants.Image.ImageCategory.item);
+        String imgUrl = getImageUrl(restDmImageClient, dmItem.getId(), Constants.Image.ImageType.normal, Constants.Image.ImageCategory.item);
         //获取剧场信息
         DmCinema dmCinema = restDmCinemaClient.getDmCinemaById(dmItem.getCinemaId());
         //组装返回数据

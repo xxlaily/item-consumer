@@ -1,5 +1,6 @@
 package cn.dm.controller;
 
+import cn.dm.common.Constants;
 import cn.dm.common.Dto;
 import cn.dm.service.ItemDetailService;
 import cn.dm.service.ParentAndChildService;
@@ -93,7 +94,7 @@ public class ItemDetailController {
     @RequestMapping(value = "/p/queryItemRecommend",method = RequestMethod.POST)
     @ResponseBody
     public Dto<List<ParentAndChildVo>> queryItemRecommend(@RequestBody Map<String, Object> param) throws Exception {
-        return parentAndChildService.queryItem("itemType2Id", param.get("itemTypeId"), (Integer) param.get("limit"), 1, 1);
+        return parentAndChildService.queryItem("itemType2Id", param.get("itemTypeId"), (Integer) param.get("limit"), 1, Constants.Image.ImageType.carousel);
     }
 
     /**

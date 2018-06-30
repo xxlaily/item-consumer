@@ -46,7 +46,7 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
         List<DmItem> dmItemList = getItemList("itemType1Id", itemTypeId, 1, 5);
         List<SlideShowVo> dataList = new ArrayList<SlideShowVo>();
         for (DmItem item : dmItemList) {
-            logger.info("[querySlideShowPic]" + "dmItemList size>>>>>>>>>>>>>>>" + dmItemList.size());
+            logger.info("[querySlideShowPic]" + "dmItemList size>>>>>>>>>>>>>>>"+dmItemList.size());
             //获取对应的轮播图信息
             String imgUrl = getImageUrl(restDmImageClient, item.getId(), Constants.Image.ImageType.carousel, Constants.Image.ImageCategory.item);
             //封装返回数据
