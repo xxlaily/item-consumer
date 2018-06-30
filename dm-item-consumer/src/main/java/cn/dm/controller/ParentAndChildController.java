@@ -2,6 +2,7 @@ package cn.dm.controller;
 
 import cn.dm.common.Constants;
 import cn.dm.common.Dto;
+import cn.dm.common.EmptyUtils;
 import cn.dm.service.ParentAndChildService;
 import cn.dm.vo.MonthVo;
 import cn.dm.vo.ParentAndChildVo;
@@ -48,7 +49,7 @@ public class ParentAndChildController {
     @RequestMapping(value = "/queryItemNice", method = RequestMethod.POST)
     @ResponseBody
     public Dto<List<ParentAndChildVo>> queryItemNice(@RequestBody Map<String, Object> param) throws Exception {
-        return parentAndChildService.queryItem("itemType1Id", param.get("itemTypeId"), Integer.parseInt(param.get("limit").toString()), 0,  Constants.Image.ImageType.carousel);
+        return parentAndChildService.queryItem("itemType1Id", param.get("itemTypeId"), Integer.parseInt(param.get("limit").toString()), 0,  Constants.Image.ImageType.poster);
     }
 
     /**
@@ -62,7 +63,7 @@ public class ParentAndChildController {
     @RequestMapping(value = "/queryItemLike", method = RequestMethod.POST)
     @ResponseBody
     public Dto<List<ParentAndChildVo>> queryItemLike(@RequestBody Map<String, Object> param) throws Exception {
-        return parentAndChildService.queryItem("itemTypeId", param.get("itemTypeId"), Integer.parseInt(param.get("limit").toString()), 0,  Constants.Image.ImageType.carousel);
+        return parentAndChildService.queryItem("itemTypeId", param.get("itemTypeId"), Integer.parseInt(EmptyUtils.isNotEmpty(param.get("limit"))?param.get("limit").toString():Constants.DEFAULT_PAGE_SIZE.toString()), 0,  Constants.Image.ImageType.normal);
     }
 
 
