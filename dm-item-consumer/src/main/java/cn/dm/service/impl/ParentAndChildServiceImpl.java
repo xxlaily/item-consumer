@@ -48,7 +48,7 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
         for (DmItem item : dmItemList) {
             logger.info("[querySlideShowPic]" + "dmItemList size>>>>>>>>>>>>>>>"+dmItemList.size());
             //获取对应的轮播图信息
-            String imgUrl = getImageUrl(restDmImageClient, item.getId(), Constants.Image.ImageType.normal, Constants.Image.ImageCategory.item);
+            String imgUrl = getImageUrl(restDmImageClient, item.getId(), Constants.Image.ImageType.carousel, Constants.Image.ImageCategory.item);
             //封装返回数据
             slideShowVo = new SlideShowVo();
             BeanUtils.copyProperties(item, slideShowVo);

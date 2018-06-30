@@ -15,9 +15,11 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Maven: net.sourceforge.jregex:jregex:1.2_01" level="project" />
+    <orderEntry type="library" name="Maven: cn.dm:dm-common-ext-utils:1.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: net.logstash.logback:logstash-logback-encoder:4.6" level="project" />
     <orderEntry type="library" name="Maven: cn.dm:dm-common-utils:1.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: cz.mallat.uasparser:uasparser:0.6.0" level="project" />
-    <orderEntry type="library" name="Maven: net.sourceforge.jregex:jregex:1.2_01" level="project" />
     <orderEntry type="library" name="Maven: com.alibaba:fastjson:1.2.31" level="project" />
     <orderEntry type="library" name="Maven: junit:junit:4.12" level="project" />
     <orderEntry type="library" name="Maven: cn.dm:dm-common-ext-utils:1.0-SNAPSHOT" level="project" />
