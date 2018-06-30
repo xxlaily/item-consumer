@@ -46,7 +46,7 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
         List<DmItem> dmItemList = getItemList("itemType1Id", itemTypeId, 1, 5);
         List<SlideShowVo> dataList = new ArrayList<SlideShowVo>();
         for (DmItem item : dmItemList) {
-            logger.info("[querySlideShowPic]" + "dmItemList size>>>>>>>>>>>>>>>"+dmItemList.size());
+            logger.info("[querySlideShowPic]" + "dmItemList size>>>>>>>>>>>>>>>" + dmItemList.size());
             //获取对应的轮播图信息
             String imgUrl = getImageUrl(restDmImageClient, item.getId(), Constants.Image.ImageType.carousel, Constants.Image.ImageCategory.item);
             //封装返回数据
@@ -68,7 +68,7 @@ public class ParentAndChildServiceImpl implements ParentAndChildService {
         Map<String, Object> paramMapCinema = new HashMap<String, Object>();
         for (DmItem item : dmItemList) {
             //获取对应的轮播图信息
-            String imgUrl = getImageUrl(restDmImageClient, item.getId(), Constants.Image.ImageType.normal, Constants.Image.ImageCategory.item);
+            String imgUrl = getImageUrl(restDmImageClient, item.getId(), type, Constants.Image.ImageCategory.item);
             //获取剧场信息
             paramMapCinema.put("cinemaId", item.getCinemaId());
             DmCinema dmCinema = restDmCinemaClient.getDmCinemaById(item.getCinemaId());

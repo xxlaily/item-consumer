@@ -1,5 +1,6 @@
 package cn.dm.controller;
 
+import cn.dm.common.Constants;
 import cn.dm.common.Dto;
 import cn.dm.service.ParentAndChildService;
 import cn.dm.vo.MonthVo;
@@ -47,7 +48,7 @@ public class ParentAndChildController {
     @RequestMapping(value = "/queryItemNice", method = RequestMethod.POST)
     @ResponseBody
     public Dto<List<ParentAndChildVo>> queryItemNice(@RequestBody Map<String, Object> param) throws Exception {
-        return parentAndChildService.queryItem("itemType1Id", param.get("itemTypeId"), Integer.parseInt(param.get("limit").toString()), 0, 1);
+        return parentAndChildService.queryItem("itemType1Id", param.get("itemTypeId"), Integer.parseInt(param.get("limit").toString()), 0, Constants.Image.ImageType.normal);
     }
 
     /**
@@ -61,7 +62,7 @@ public class ParentAndChildController {
     @RequestMapping(value = "/queryItemLike", method = RequestMethod.POST)
     @ResponseBody
     public Dto<List<ParentAndChildVo>> queryItemLike(@RequestBody Map<String, Object> param) throws Exception {
-        return parentAndChildService.queryItem("itemTypeId", param.get("itemTypeId"), Integer.parseInt(param.get("limit").toString()), 0, 1);
+        return parentAndChildService.queryItem("itemTypeId", param.get("itemTypeId"), Integer.parseInt(param.get("limit").toString()), 0, Constants.Image.ImageType.normal);
     }
 
 
@@ -76,7 +77,7 @@ public class ParentAndChildController {
     @RequestMapping(value = "/queryItemByAge", method = RequestMethod.POST)
     @ResponseBody
     public Dto<List<ParentAndChildVo>> queryItemByAge(@RequestBody Map<String, Object> param) throws Exception {
-        return parentAndChildService.queryItem("ageGroup", param.get("ageGroup"), Integer.parseInt(param.get("limit").toString()), 0, 1);
+        return parentAndChildService.queryItem("ageGroup", param.get("ageGroup"), Integer.parseInt(param.get("limit").toString()), 0, Constants.Image.ImageType.normal);
     }
 
 
@@ -126,7 +127,7 @@ public class ParentAndChildController {
     public Dto<List<ParentAndChildVo>> queryAdvertising(@RequestBody Map<String, Object> param) throws Exception {
         Long itemTypeId = Long.parseLong(param.get("itemTypeId").toString());
         Integer limit = Integer.parseInt(param.get("limit").toString());
-        return parentAndChildService.queryItem("itemType1Id", itemTypeId, limit, 0, 0);
+        return parentAndChildService.queryItem("itemType1Id", itemTypeId, limit, 0, Constants.Image.ImageType.poster);
     }
 
 
