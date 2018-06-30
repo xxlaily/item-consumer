@@ -85,8 +85,8 @@ public class ItemDetailServiceImpl implements ItemDetailService {
             ItemSchedulerVo itemSchedulerVo = new ItemSchedulerVo();
             BeanUtils.copyProperties(dmItem, itemSchedulerVo);
             BeanUtils.copyProperties(dmSchedulerList.get(i), itemSchedulerVo);
-            itemSchedulerVo.setStartTime(DateUtil.format(dmItem.getStartTime()));
-            itemSchedulerVo.setEndTime(DateUtil.format(dmItem.getEndTime()));
+            itemSchedulerVo.setStartTime(DateUtil.format(dmSchedulerList.get(i).getStartTime()));
+            itemSchedulerVo.setEndTime(DateUtil.format(dmSchedulerList.get(i).getEndTime()));
             resultList.add(itemSchedulerVo);
         }
         return DtoUtil.returnDataSuccess(resultList);
