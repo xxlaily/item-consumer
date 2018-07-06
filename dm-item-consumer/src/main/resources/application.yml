@@ -32,7 +32,7 @@ spring:
       bootstrap-servers: 192.168.9.151:9092
       buffer-memory: 33554432
       key-serializer: org.apache.kafka.common.serialization.StringSerializer # 指定消息key和消息体的编解码方式
-      value-serializer: org.apache.kafka.common.serialization.StringDeserializer #添加
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer #添加
     consumer:
       bootstrap-servers: 192.168.9.151:9092
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
