@@ -32,7 +32,17 @@ spring:
       bootstrap-servers: 192.168.9.151:9092
       buffer-memory: 33554432
       key-serializer: org.apache.kafka.common.serialization.StringSerializer # 指定消息key和消息体的编解码方式
-      value-serializer: org.apache.kafka.common.serialization #添加
+      value-serializer: org.apache.kafka.common.serialization.StringDeserializer #添加
+    consumer:
+      bootstrap-servers: 192.168.9.151:9092
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: test-consumer-group
+      auto-commit-interval: 100
+      auto-offset-reset: earliest
+      enable-auto-commit: true
+    listener:
+      poll-timeout: 10000
 eureka:
   client:
     service-url:
