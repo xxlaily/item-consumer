@@ -67,4 +67,4 @@ feign:
   hystrix:
     enabled: false #禁用容错处理
 
-moduleName: dm-item
+moduleName: dm_item
